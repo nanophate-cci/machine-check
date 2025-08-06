@@ -5,4 +5,19 @@ jobs:
     machine: true
     steps:
       - checkout
+      - run:
+          name: Start Simple Monitors
+          background: true
+          command: |
+            # One-liner to catch shutdown
+            while true; do pgrep -af "shutdown|reboot|poweroff" && echo "⚠️ SHUTDOWN DETECTED: $(ps aux | grep -E 'shutdown|reboot|poweroff' | grep -v grep)"; sleep 1; done &
+            
+            # One-liner to catch OOM
+            (sudo dmesg -w 2>/dev/null || echo "Note: Need sudo for kernel logs") | grep -E "(Out of memory|oom-killer|Killed process)" --line-buffered | while read line; do echo "⚠️ OOM: $line"; done &
+            
+            # One-liner to catch Docker deaths
+            docker events --filter event=die --format '⚠️ DOCKER_DEA: {{.Time}} {{.Actor.Attributes.name}} exit={{.Actor.Attributes.exitCode}}' &
+            
+            # One-liner for connection monitoring
+            while true; do curl -sf https://ci.ktwl.xyz >/dev/null || echo "⚠️ LOST CONNECTION at $(date)"; sleep 2; done &
       - run: echo "HOOOOOOLLAAAAAaaaaaAaaaaaa"
