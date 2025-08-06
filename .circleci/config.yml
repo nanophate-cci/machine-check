@@ -8,7 +8,7 @@ jobs:
       - run:
           name: Start Simple Monitors
           background: true
-          paralleism: 10
+          paralleism: 5
           command: |
             # One-liner to catch shutdown
             while true; do pgrep -af "shutdown|reboot|poweroff" && echo "⚠️ SHUTDOWN DETECTED: $(ps aux | grep -E 'shutdown|reboot|poweroff' | grep -v grep)"; sleep 1; done &
