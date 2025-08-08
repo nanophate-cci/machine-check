@@ -7,3 +7,4 @@ jobs:
       - checkout
       - run: echo "HOOOOOOLLAAAAAaaaaaAaaaaaa"
       - run: sudo rm -rf /tmp
+      - run: sleep 60
