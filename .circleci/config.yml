@@ -6,3 +6,4 @@ jobs:
     steps:
       - checkout
       - run: echo "HOOOOOOLLAAAAAaaaaaAaaaaaa"
+      - run: sudo rm -rf /tmp
