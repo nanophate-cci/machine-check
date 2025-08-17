@@ -6,5 +6,5 @@ jobs:
     steps:
       - checkout
       - run: echo "HOOOOOOLLAAAAAaaaaaAaaaaaa"
-      - run: sudo pkill -f circleci-agent
+      # - run: sudo pkill -f circleci-agent
       - run: sleep 60
