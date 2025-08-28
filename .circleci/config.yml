@@ -21,4 +21,4 @@ jobs:
             
             # One-liner for connection monitoring
             while true; do curl -sf https://ci.ktwl.xyz >/dev/null || echo "⚠️ LOST CONNECTION at $(date)"; sleep 2; done &
-      - run: timeout 1m sleep 120 && echo "HOOOOOOLLAAAAAaaaaaAaaaaaa"
+      - run: timeout 1m sleep 120 && echo "HOOOOOOLLAAAAAaaaaaAaaaaaaaa"
