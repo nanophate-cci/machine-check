@@ -6,19 +6,25 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Start Simple Monitors
-          background: true
-          paralleism: 5
+          name: Update hop
           command: |
-            # One-liner to catch shutdown
-            while true; do pgrep -af "shutdown|reboot|poweroff" && echo "⚠️ SHUTDOWN DETECTED: $(ps aux | grep -E 'shutdown|reboot|poweroff' | grep -v grep)"; sleep 1; done &
-            
-            # One-liner to catch OOM
-            (sudo dmesg -w 2>/dev/null || echo "Note: Need sudo for kernel logs") | grep -E "(Out of memory|oom-killer|Killed process)" --line-buffered | while read line; do echo "⚠️ OOM: $line"; done &
-            
-            # One-liner to catch Docker deaths
-            docker events --filter event=die --format '⚠️ DOCKER_DEA: {{.Time}} {{.Actor.Attributes.name}} exit={{.Actor.Attributes.exitCode}}' &
-            
-            # One-liner for connection monitoring
-            while true; do curl -sf https://ci.ktwl.xyz >/dev/null || echo "⚠️ LOST CONNECTION at $(date)"; sleep 2; done &
+              # Get instance metadata
+              TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" 2>/dev/null)
+              INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id 2>/dev/null)
+              REGION=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/placement/region 2>/dev/null)
+
+              echo "Instance ID: $INSTANCE_ID"
+              echo "Region: $REGION"
+
+              # Modify hop limit (requires IAM permissions)
+              aws ec2 modify-instance-metadata-options \
+                  --instance-id $INSTANCE_ID \
+                  --http-put-response-hop-limit 2 \
+                  --region $REGION
+
+              if [ $? -eq 0 ]; then
+                  echo "Successfully modified hop limit"
+              else
+                  echo "Failed to modify hop limit - check IAM permissions"
+              fi
       - run: timeout 1m sleep 120 && echo "HOOOOOOLLAAAAAaaaaaAaaaaaaaa"
